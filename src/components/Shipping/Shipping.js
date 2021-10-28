@@ -1,13 +1,31 @@
 import React from 'react';
 import { useForm } from 'react-hook-form';
 import useAuth from '../../hooks/useAuth';
+import { clearTheCart, getStoredCart } from '../../../src/utilities/fakedb';
 import './Shipping.css';
 
 const Shipping = () => {
-    const { register, handleSubmit, formState: { errors } } = useForm();
+    const { register, handleSubmit, reset, formState: { errors } } = useForm();
     const { user } = useAuth();
     const onSubmit = data => {
-        console.log(data)
+        const savedCart = getStoredCart();
+        data.order = savedCart;
+
+        fetch(`https://aqueous-sands-49928.herokuapp.com/orders`, {
+            method: 'POST',
+            headers: {
+                'content-type': 'application/json'
+            },
+            body: JSON.stringify(data)
+        })
+            .then(res => res.json())
+            .then(result => {
+                if (result.insertedId) {
+                    alert('Order processed Successfully');
+                    clearTheCart();
+                    reset();
+                }
+            })
     };
     return (
         <div>
@@ -21,7 +39,7 @@ const Shipping = () => {
                 <input placeholder="City" defaultValue="" {...register("city")} />
                 <input placeholder="phone number" defaultValue="" {...register("phone")} />
 
-                <input type="submit" />
+                <input onClick="" type="submit" />
             </form>
         </div>
     );
